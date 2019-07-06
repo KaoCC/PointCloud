@@ -2,7 +2,9 @@
 #include <embree3/rtcore.h>
 #include <iostream>
 
-
+#include <vector>
+#include <cmath>
+#include <fstream>
 
 #include <x86intrin.h>
 
@@ -15,17 +17,39 @@
 
 
 
+// tmp, helper const
+
+const std::string output_file_name = "points.xyz";
+
+
 // tmp, helper struct
 
 struct Vertex   { float x,y,z,r;  };
 struct Triangle { int v0, v1, v2; };
 
+struct Vec {
 
+    Vec(float xx, float yy, float zz) : x(xx), y(yy), z(zz), w(1.0f) {}
+
+    float x = 0;
+    float y = 0;
+    float z = 0;
+    float w = 1.0f;
+};
+
+
+// tmp, helper ops
+
+Vec operator +( const Vec& a, const Vec& b ) { return Vec(a.x + b.x, a.y + b.y, a.z + b.z); }
+Vec operator *( float f, const Vec& b ) { return Vec(f * b.x, f * b.y, f * b.z); }
+Vec operator *( const Vec& a, float f ) { return Vec(a.x * f  , a.y * f  , a.z * f  ); }
+float dot( const Vec& a, const Vec& b ) {return a.x * b.x + a.y * b.y + a.z * b.z;}
+Vec normalize( const Vec& a )  { return a * (1.0 / sqrt(dot(a,a))) ; }
 
 // tmp, helper function
 
 /* adds a ground plane to the scene */
-unsigned int addGroundPlane (RTCScene scene, RTCDevice device)
+static unsigned int addGroundPlane (RTCScene scene, RTCDevice device)
 {
   /* create a triangulated plane with 2 triangles and 4 vertices */
   RTCGeometry mesh = rtcNewGeometry (device, RTC_GEOMETRY_TYPE_TRIANGLE);
@@ -65,8 +89,76 @@ int main () {
 
     rtcCommitScene(scene);
 
+    Vec camera_orig (0, 0, 0);
+    Vec u_axis(1, 0, 0);
+    Vec v_axis(0, 1, 0);
+    Vec w_axis(0, 0, 1);
 
+
+    const unsigned width = 128;
+    const unsigned height = 128;
+
+    std::vector<std::vector<Vec>> hit_points (height, std::vector<Vec>(width, Vec(0, 0, 0)));
+
+    int hit_count = 0;
+
+    std::ofstream ofs (output_file_name, std::ofstream::out);
     
+
+    for (int i = 0; i < width; ++i) {
+        for (int j = 0; j < height; ++j) {
+
+            float dt_x = ((float)i / width) * 2 * M_PI;
+            float dt_y = ((float)j / height) * M_PI;
+
+            float u_scale = cos(dt_x) * sin (dt_y);
+            float v_scale = cos(dt_y);
+            float w_scale = sin(dt_x) * sin(dt_y);
+
+            Vec ray_dir = normalize( (u_scale * u_axis) + (v_scale * v_axis) + (w_scale * w_axis) );
+
+            // std::cout << "du" << ray_dir.x << "\n";
+
+            RTCRay ray;
+            ray.org_x = camera_orig.x;
+            ray.org_y = camera_orig.y;
+            ray.org_z = camera_orig.z;
+            ray.tnear = 0;
+            ray.dir_x = ray_dir.x;
+            ray.dir_y = ray_dir.y;
+            ray.dir_z = ray_dir.z;
+            ray.tfar = std::numeric_limits<float>::max();
+
+            RTCRayHit rayhit;
+            rayhit.ray = ray;
+            rayhit.hit.geomID = RTC_INVALID_GEOMETRY_ID;
+
+
+            // test intersection
+            RTCIntersectContext context;
+            rtcInitIntersectContext(&context);
+
+            rtcIntersect1(scene, &context, &rayhit);
+
+            if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
+                std::cout << "HIT: " << i << " " << j << " " << rayhit.ray.tfar <<"\n";
+
+                auto final = rayhit.ray.tfar * ray_dir;
+
+                hit_points[i][j].x = final.x;
+                hit_points[i][j].y = final.y;
+                hit_points[i][j].z = final.z;
+
+                ofs << final.x << " " << final.y << " " << final.z << std::endl;
+
+                ++hit_count;
+            }
+        }
+    }
+
+    std::cout << "total hit counts: " << hit_count << " number of samples: " << width * height << std::endl;
+
+
 
     // clean up ... 
 
