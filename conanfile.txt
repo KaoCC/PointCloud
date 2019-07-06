@@ -1,0 +1,10 @@
+[requires]
+embree/3.5.2@kaocc/stable
+
+[generators]
+cmake
+
+[imports]
+bin, *.dll -> ./bin # Copies all dll files from the package "bin" folder to my project "bin" folder
+lib, *.dylib* -> ./bin # Copies all dylib files from the package "lib" folder to my project "bin" folder
+lib, *.so* -> ./bin # Copies all so files from lib to bin
