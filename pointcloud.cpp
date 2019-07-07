@@ -10,6 +10,8 @@
 
 #include <x86intrin.h>
 
+#include "helper.hpp"
+
 #if !defined(_MM_SET_DENORMALS_ZERO_MODE)
     #define _MM_DENORMALS_ZERO_ON   (0x0040)
     #define _MM_DENORMALS_ZERO_OFF  (0x0000)

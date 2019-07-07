@@ -7,12 +7,12 @@ conan_basic_setup()
 
 
 
-add_executable(pointcloud "${CMAKE_CURRENT_SOURCE_DIR}/pointcloud.cpp")
+add_executable(pointcloud ${CMAKE_CURRENT_SOURCE_DIR}/pointcloud.cpp ${CMAKE_CURRENT_SOURCE_DIR}/helper.cpp)
 
 if(MSVC)
   target_compile_options(pointcloud PRIVATE /W4 /WX)
 else()
-  target_compile_options(pointcloud PRIVATE -Wall -Wextra -pedantic -Werror)
+  target_compile_options(pointcloud PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 
