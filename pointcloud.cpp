@@ -64,10 +64,10 @@ static unsigned int addGroundPlane (RTCScene scene, RTCDevice device)
 
   /* set vertices */
   Vertex* vertices = (Vertex*) rtcSetNewGeometryBuffer(mesh,RTC_BUFFER_TYPE_VERTEX,0,RTC_FORMAT_FLOAT3,sizeof(Vertex),4);
-  vertices[0].x = -10; vertices[0].y = -2; vertices[0].z = -10;
-  vertices[1].x = -10; vertices[1].y = -2; vertices[1].z = +10;
-  vertices[2].x = +10; vertices[2].y = -2; vertices[2].z = -10;
-  vertices[3].x = +10; vertices[3].y = -2; vertices[3].z = +10;
+  vertices[0].x = -10; vertices[0].y = -10; vertices[0].z = -2;
+  vertices[1].x = -10; vertices[1].y = +10; vertices[1].z = -2;
+  vertices[2].x = +10; vertices[2].y = -10; vertices[2].z = -2;
+  vertices[3].x = +10; vertices[3].y = +10; vertices[3].z = -2;
 
   /* set triangles */
   Triangle* triangles = (Triangle*) rtcSetNewGeometryBuffer(mesh,RTC_BUFFER_TYPE_INDEX,0,RTC_FORMAT_UINT3,sizeof(Triangle),2);
