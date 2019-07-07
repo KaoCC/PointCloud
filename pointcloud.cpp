@@ -21,10 +21,10 @@
 
 
 
-// tmp, helper const
+// tmp, helper variables
 
-const std::string output_file_name = "points.txt";
-
+static std::string output_file_name = "points.xyz";
+static const std::string file_path = "/tmp/trans.txt";
 
 // tmp, helper struct
 
@@ -189,6 +189,28 @@ int main (int argc, char* argv[]) {
 
     std::cout << "add ground: " << addGroundPlane(scene, device) << std::endl;
 
+    // test
+    /* std::array<std::array<float, 4>, 4> tran;
+
+    // I
+    tran[0][0] = 1;
+    tran[1][1] = 1;
+    tran[2][2] = 1;
+    tran[3][3] = 1;
+
+    // T
+    tran[0][3] = 4;
+    tran[1][3] = 4;
+    tran[2][3] = 4; */
+
+    /* read trans */
+
+    auto transformation = readFile(file_path, 100);
+
+    for (auto&& tran : transformation) {
+        std::cout << "add Cube: " << addCube(scene, device, tran) << std::endl;
+    }
+
     rtcCommitScene(scene);
 
     Vec camera_orig (0, 0, 0);
@@ -197,19 +219,21 @@ int main (int argc, char* argv[]) {
     Vec w_axis(0, 0, 1);
 
 
-    const unsigned width = 128;
-    const unsigned height = 128;
+    const unsigned width = 2048;
+    const unsigned height = 2048;
 
     std::vector<std::vector<Vec>> hit_points (height, std::vector<Vec>(width, Vec(0, 0, 0)));
 
     int hit_count = 0;
-    std::ofstream ofs (output_file_name, std::ofstream::out);
+
     bool use_world_frame = false;
     bool verbose_mode = false;
+    bool color_mode = false;
 
     if (argc >= 2) {
         const std::string world_opt = "-w";
         const std::string verbose_opt = "-v";
+        const std::string color_opt = "-c";
         std::unordered_set<std::string> options;
         for (int c = 1; c < argc; ++c) {
             options.insert(argv[c]);
@@ -227,6 +251,14 @@ int main (int argc, char* argv[]) {
             options.erase(verbose_opt);
         }
 
+        if (options.count(color_opt) == 1) {
+            std::cout << "[Option]: Color mode" << std::endl;
+            color_mode = true;
+            options.erase(color_opt);
+
+            output_file_name = "points_with_color.txt";
+        }
+
         if (!options.empty()) {
             for (auto&& opt : options) {
                 std::cerr << "Unknown Option found:" << opt << std::endl;
@@ -234,15 +266,17 @@ int main (int argc, char* argv[]) {
         }
     }
 
+    std::ofstream ofs (output_file_name, std::ofstream::out);
+
     for (unsigned i = 0; i < width; ++i) {
         for (unsigned j = 0; j < height; ++j) {
 
-            float dt_x = ((float)i / width) * 2 * M_PI;
-            float dt_y = ((float)j / height) * M_PI;
+            float dt_phi = ((float)i / width) * 2 * M_PI;
+            float dt_theta = ((float)j / height) * M_PI;
 
-            float u_scale = cos(dt_x) * sin (dt_y);
-            float v_scale = cos(dt_y);
-            float w_scale = sin(dt_x) * sin(dt_y);
+            float u_scale = cos(dt_phi) * sin(dt_theta);
+            float v_scale = sin(dt_phi) * sin(dt_theta);
+            float w_scale = cos(dt_theta);
 
             Vec ray_dir = normalize( (u_scale * u_axis) + (v_scale * v_axis) + (w_scale * w_axis) );
 
@@ -285,14 +319,22 @@ int main (int argc, char* argv[]) {
                 hit_points[i][j].y = final_pos.y;
                 hit_points[i][j].z = final_pos.z;
 
-                ofs << final_pos.x << " " << final_pos.y << " " << final_pos.z << " " << 2 * i << " " << 2 * i << " " << 2 * i << std::endl;
+                ofs << final_pos.x << " " << final_pos.y << " " << final_pos.z << " ";
+                
+                if (color_mode) {
+                    float color_scale = width / 256;
+                    unsigned color_value= ((float) i / color_scale);
+                    ofs << color_value << " " << color_value << " " << 0;
+                }
+
+                ofs << std::endl;
 
                 ++hit_count;
             }
         }
 
-        camera_orig.x += 0.05;
-        camera_orig.z += 0.01;
+         camera_orig.x += 0.01;
+         camera_orig.y += 0.01;
     }
 
     std::cout << "total hit counts: " << hit_count << " number of samples: " << width * height << std::endl;
