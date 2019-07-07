@@ -19,7 +19,7 @@
 
 // tmp, helper const
 
-const std::string output_file_name = "points.xyz";
+const std::string output_file_name = "points.txt";
 
 
 // tmp, helper struct
@@ -74,7 +74,10 @@ static unsigned int addGroundPlane (RTCScene scene, RTCDevice device)
 
 
 
-int main () {
+
+
+
+int main (int argc, char* argv[]) {
 
     _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
     _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
@@ -101,9 +104,18 @@ int main () {
     std::vector<std::vector<Vec>> hit_points (height, std::vector<Vec>(width, Vec(0, 0, 0)));
 
     int hit_count = 0;
-
     std::ofstream ofs (output_file_name, std::ofstream::out);
-    
+    bool use_world_frame = false;
+
+    if (argc == 2) {
+        auto option = std::string(argv[1]);
+        if (option == "world") {
+            std::cout << "Use World Frame !!" << std::endl;
+            use_world_frame = true;
+        } else {
+            throw std::runtime_error("unknown option");
+        }
+    }
 
     for (unsigned i = 0; i < width; ++i) {
         for (unsigned j = 0; j < height; ++j) {
@@ -143,25 +155,31 @@ int main () {
             if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
                 std::cout << "HIT: " << i << " " << j << " " << rayhit.ray.tfar <<"\n";
 
-                auto final = rayhit.ray.tfar * ray_dir;
+                auto final_pos = (rayhit.ray.tfar * ray_dir);
 
-                hit_points[i][j].x = final.x;
-                hit_points[i][j].y = final.y;
-                hit_points[i][j].z = final.z;
+                if (use_world_frame) {
+                    final_pos = final_pos + camera_orig;
+                }
 
-                ofs << final.x << " " << final.y << " " << final.z << std::endl;
+                // tmp
+                hit_points[i][j].x = final_pos.x;
+                hit_points[i][j].y = final_pos.y;
+                hit_points[i][j].z = final_pos.z;
+
+                ofs << final_pos.x << " " << final_pos.y << " " << final_pos.z << " " << 2 * i << " " << 2 * i << " " << 2 * i << std::endl;
 
                 ++hit_count;
             }
         }
+
+        camera_orig.x += 0.05;
+        camera_orig.z += 0.01;
     }
 
     std::cout << "total hit counts: " << hit_count << " number of samples: " << width * height << std::endl;
 
 
-
     // clean up ... 
-
     std::cout << "Releasing scene ... " << std::endl;
     rtcReleaseScene(scene);
     std::cout << "Releasing device ..." << std::endl;
