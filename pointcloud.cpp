@@ -105,8 +105,8 @@ int main () {
     std::ofstream ofs (output_file_name, std::ofstream::out);
     
 
-    for (int i = 0; i < width; ++i) {
-        for (int j = 0; j < height; ++j) {
+    for (unsigned i = 0; i < width; ++i) {
+        for (unsigned j = 0; j < height; ++j) {
 
             float dt_x = ((float)i / width) * 2 * M_PI;
             float dt_y = ((float)j / height) * M_PI;
