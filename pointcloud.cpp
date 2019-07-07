@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <fstream>
+#include <unordered_set>
 
 #include <x86intrin.h>
 
@@ -106,14 +107,32 @@ int main (int argc, char* argv[]) {
     int hit_count = 0;
     std::ofstream ofs (output_file_name, std::ofstream::out);
     bool use_world_frame = false;
+    bool verbose_mode = false;
 
-    if (argc == 2) {
-        auto option = std::string(argv[1]);
-        if (option == "world") {
-            std::cout << "Use World Frame !!" << std::endl;
+    if (argc >= 2) {
+        const std::string world_opt = "-w";
+        const std::string verbose_opt = "-v";
+        std::unordered_set<std::string> options;
+        for (int c = 1; c < argc; ++c) {
+            options.insert(argv[c]);
+        }
+
+        if (options.count(world_opt) == 1) {
+            std::cout << "[Option]: Use world frame" << std::endl;
             use_world_frame = true;
-        } else {
-            throw std::runtime_error("unknown option");
+            options.erase(world_opt);
+        }
+
+        if (options.count(verbose_opt) == 1) {
+            std::cout << "[Option]: Verbose mode" << std::endl;
+            verbose_mode = true;
+            options.erase(verbose_opt);
+        }
+
+        if (!options.empty()) {
+            for (auto&& opt : options) {
+                std::cerr << "Unknown Option found:" << opt << std::endl;
+            }
         }
     }
 
@@ -153,7 +172,9 @@ int main (int argc, char* argv[]) {
             rtcIntersect1(scene, &context, &rayhit);
 
             if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
-                std::cout << "HIT: " << i << " " << j << " " << rayhit.ray.tfar <<"\n";
+                if (verbose_mode) {
+                    std::cout << "HIT: " << i << " " << j << " " << rayhit.ray.tfar <<"\n";
+                }
 
                 auto final_pos = (rayhit.ray.tfar * ray_dir);
 
