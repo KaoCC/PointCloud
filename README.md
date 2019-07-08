@@ -2,6 +2,11 @@
 Point Cloud Generator for Simulation
 
 
+## Dependency
+
+- Conan
+- [embree/3.5.2@kaocc/stable](https://github.com/KaoCC/conan-packages/tree/master/embree)
+
 ## Build
 
 The following compilers are tested:
