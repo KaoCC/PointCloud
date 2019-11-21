@@ -15,6 +15,12 @@ const int MAXLINE = 2048;
 std::vector<std::array<std::array<float, 4>, 4>>
 readFile(const std::string &file_path, unsigned frame_id) {
     ifstream inFile(file_path);
+
+    if (!inFile) {
+        cerr << "File empty ?" << endl;
+        return {};
+    }
+
     char oneline[MAXLINE];
 
     std::vector<std::array<std::array<float, 4>, 4>> poses;
