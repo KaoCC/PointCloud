@@ -1,5 +1,5 @@
 [requires]
-embree/3.5.2@kaocc/stable
+embree/3.6.1@kaocc/stable
 
 [generators]
 cmake

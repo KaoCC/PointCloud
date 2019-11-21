@@ -6,8 +6,14 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 
+set(BASE_SRC
 
-add_executable(pointcloud ${CMAKE_CURRENT_SOURCE_DIR}/pointcloud.cpp ${CMAKE_CURRENT_SOURCE_DIR}/helper.cpp)
+    src/pointcloud.cpp
+    src/helper.cpp
+)
+
+
+add_executable(pointcloud ${BASE_SRC})
 
 if(MSVC)
   target_compile_options(pointcloud PRIVATE /W4 /WX)
