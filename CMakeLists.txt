@@ -10,6 +10,7 @@ set(BASE_SRC
 
     src/pointcloud.cpp
     src/helper.cpp
+    src/scene_io.cpp
 )
 
 

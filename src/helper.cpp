@@ -5,7 +5,7 @@
 #include <stdlib.h>
 using namespace std;
 
-const int MAXLINE = 2048;
+constexpr int MAXLINE = 2048;
 
 /* int main()
 {
@@ -13,7 +13,7 @@ const int MAXLINE = 2048;
 } */
 
 std::vector<std::array<std::array<float, 4>, 4>>
-readFile(const std::string &file_path, unsigned frame_id) {
+read_file(const std::string &file_path, unsigned frame_id) {
     ifstream inFile(file_path);
 
     if (!inFile) {

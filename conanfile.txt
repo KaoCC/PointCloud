@@ -1,5 +1,6 @@
 [requires]
 embree/3.6.1@kaocc/stable
+tinyobjloader/1.0.6
 
 [generators]
 cmake
