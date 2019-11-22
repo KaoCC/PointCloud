@@ -13,8 +13,4 @@
 // R20 R21 R22 T3
 // 0    0   0   1
 
-std::vector<std::array<std::array<float, 4>, 4>>
-read_file(const std::string &file_path, unsigned frame_id);
-
-
-
+std::vector<std::array<std::array<float, 4>, 4>> read_file(const std::string &file_path, unsigned frame_id);

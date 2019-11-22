@@ -2,32 +2,22 @@
 #include "scene_io.hpp"
 #include "type.hpp"
 
-
 namespace {
 
+void apply_transformation(const std::array<std::array<float, 4>, 4> &trans, Vertex &point) {
 
-void apply_transformation(const std::array<std::array<float, 4>, 4> &trans,
-                       Vertex &point) {
-
-    float x_t = trans[0][0] * point.x + trans[0][1] * point.y +
-                trans[0][2] * point.z + trans[0][3] * 1;
-    float y_t = trans[1][0] * point.x + trans[1][1] * point.y +
-                trans[1][2] * point.z + trans[1][3] * 1;
-    float z_t = trans[2][0] * point.x + trans[2][1] * point.y +
-                trans[2][2] * point.z + trans[2][3] * 1;
+    float x_t = trans[0][0] * point.x + trans[0][1] * point.y + trans[0][2] * point.z + trans[0][3] * 1;
+    float y_t = trans[1][0] * point.x + trans[1][1] * point.y + trans[1][2] * point.z + trans[1][3] * 1;
+    float z_t = trans[2][0] * point.x + trans[2][1] * point.y + trans[2][2] * point.z + trans[2][3] * 1;
     // last should always be [0, 0, 0, 1] * [x, y, z, 1]^T = 1
 
     point.x = x_t;
     point.y = y_t;
     point.z = z_t;
     // point.w should be 1
-
 }
 
-
-
-}
-
+} // namespace
 
 /* adds a ground plane to the scene */
 unsigned int add_ground_plane(RTCScene scene, RTCDevice device) {
@@ -35,8 +25,8 @@ unsigned int add_ground_plane(RTCScene scene, RTCDevice device) {
     RTCGeometry mesh = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
     /* set vertices */
-    Vertex *vertices = (Vertex *)rtcSetNewGeometryBuffer(
-        mesh, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, sizeof(Vertex), 4);
+    Vertex *vertices =
+        (Vertex *)rtcSetNewGeometryBuffer(mesh, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, sizeof(Vertex), 4);
     vertices[0].x = -10;
     vertices[0].y = -10;
     vertices[0].z = -2;
@@ -51,8 +41,8 @@ unsigned int add_ground_plane(RTCScene scene, RTCDevice device) {
     vertices[3].z = -2;
 
     /* set triangles */
-    Triangle *triangles = (Triangle *)rtcSetNewGeometryBuffer(
-        mesh, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, sizeof(Triangle), 2);
+    Triangle *triangles =
+        (Triangle *)rtcSetNewGeometryBuffer(mesh, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, sizeof(Triangle), 2);
     triangles[0].v0 = 0;
     triangles[0].v1 = 1;
     triangles[0].v2 = 2;
@@ -66,17 +56,14 @@ unsigned int add_ground_plane(RTCScene scene, RTCDevice device) {
     return geomID;
 }
 
-
-
 /* adds a cube to the scene */
-unsigned int add_cube(RTCScene scene_i, RTCDevice device,
-                            const std::array<std::array<float, 4>, 4> &trans) {
+unsigned int add_cube(RTCScene scene_i, RTCDevice device, const std::array<std::array<float, 4>, 4> &trans) {
     /* create a triangulated cube with 12 triangles and 8 vertices */
     RTCGeometry mesh = rtcNewGeometry(device, RTC_GEOMETRY_TYPE_TRIANGLE);
 
     /* set vertices and vertex colors */
-    Vertex *vertices = (Vertex *)rtcSetNewGeometryBuffer(
-        mesh, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, sizeof(Vertex), 8);
+    Vertex *vertices =
+        (Vertex *)rtcSetNewGeometryBuffer(mesh, RTC_BUFFER_TYPE_VERTEX, 0, RTC_FORMAT_FLOAT3, sizeof(Vertex), 8);
 
     vertices[0].x = -1;
     vertices[0].y = -1;
@@ -105,8 +92,8 @@ unsigned int add_cube(RTCScene scene_i, RTCDevice device,
 
     /* set triangles and face colors */
     int tri = 0;
-    Triangle *triangles = (Triangle *)rtcSetNewGeometryBuffer(
-        mesh, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, sizeof(Triangle), 12);
+    Triangle *triangles =
+        (Triangle *)rtcSetNewGeometryBuffer(mesh, RTC_BUFFER_TYPE_INDEX, 0, RTC_FORMAT_UINT3, sizeof(Triangle), 12);
 
     // left side
     triangles[tri].v0 = 0;
@@ -182,4 +169,3 @@ unsigned int add_cube(RTCScene scene_i, RTCDevice device,
     rtcReleaseGeometry(mesh);
     return geomID;
 }
-

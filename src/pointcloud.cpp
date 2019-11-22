@@ -10,23 +10,20 @@
 #include <x86intrin.h>
 
 #include "helper.hpp"
-#include "type.hpp"
 #include "scene_io.hpp"
+#include "type.hpp"
 
 #if !defined(_MM_SET_DENORMALS_ZERO_MODE)
 #define _MM_DENORMALS_ZERO_ON (0x0040)
 #define _MM_DENORMALS_ZERO_OFF (0x0000)
 #define _MM_DENORMALS_ZERO_MASK (0x0040)
-#define _MM_SET_DENORMALS_ZERO_MODE(x)                                         \
-    (_mm_setcsr((_mm_getcsr() & ~_MM_DENORMALS_ZERO_MASK) | (x)))
+#define _MM_SET_DENORMALS_ZERO_MODE(x) (_mm_setcsr((_mm_getcsr() & ~_MM_DENORMALS_ZERO_MASK) | (x)))
 #endif
 
 // tmp, helper variables
 
 static std::string output_file_name = "points.xyz";
 static const std::string file_path = "/tmp/trans.txt";
-
-
 
 int main(int argc, char *argv[]) {
 
@@ -39,7 +36,6 @@ int main(int argc, char *argv[]) {
     auto scene = rtcNewScene(device);
 
     std::cout << "add ground: " << add_ground_plane(scene, device) << std::endl;
-
 
     /* read transformation */
     auto transformation = read_file(file_path, 100);
@@ -58,8 +54,7 @@ int main(int argc, char *argv[]) {
     const unsigned width = 2048;
     const unsigned height = 2048;
 
-    std::vector<std::vector<Vec>> hit_points(
-        height, std::vector<Vec>(width, Vec{0, 0, 0}));
+    std::vector<std::vector<Vec>> hit_points(height, std::vector<Vec>(width, Vec{0, 0, 0}));
 
     int hit_count = 0;
 
@@ -115,8 +110,7 @@ int main(int argc, char *argv[]) {
             float v_scale = sin(dt_phi) * sin(dt_theta);
             float w_scale = cos(dt_theta);
 
-            Vec ray_dir = normalize((u_scale * u_axis) + (v_scale * v_axis) +
-                                    (w_scale * w_axis));
+            Vec ray_dir = normalize((u_scale * u_axis) + (v_scale * v_axis) + (w_scale * w_axis));
 
             // std::cout << "du" << ray_dir.x << "\n";
 
@@ -142,8 +136,7 @@ int main(int argc, char *argv[]) {
 
             if (rayhit.hit.geomID != RTC_INVALID_GEOMETRY_ID) {
                 if (verbose_mode) {
-                    std::cout << "HIT: " << i << " " << j << " "
-                              << rayhit.ray.tfar << "\n";
+                    std::cout << "HIT: " << i << " " << j << " " << rayhit.ray.tfar << "\n";
                 }
 
                 auto final_pos = (rayhit.ray.tfar * ray_dir);
@@ -157,8 +150,7 @@ int main(int argc, char *argv[]) {
                 hit_points[i][j].y = final_pos.y;
                 hit_points[i][j].z = final_pos.z;
 
-                ofs << final_pos.x << " " << final_pos.y << " " << final_pos.z
-                    << " ";
+                ofs << final_pos.x << " " << final_pos.y << " " << final_pos.z << " ";
 
                 if (color_mode) {
                     float color_scale = width / 256;
@@ -176,8 +168,7 @@ int main(int argc, char *argv[]) {
         camera_orig.y += 0.01;
     }
 
-    std::cout << "total hit counts: " << hit_count
-              << " number of samples: " << width * height << std::endl;
+    std::cout << "total hit counts: " << hit_count << " number of samples: " << width * height << std::endl;
 
     // clean up ...
     std::cout << "Releasing scene ... " << std::endl;
